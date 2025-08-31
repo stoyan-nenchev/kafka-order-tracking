@@ -1,0 +1,7 @@
+bootJar {
+    archiveFileName = 'notification-service.jar'
+}
+
+springBoot {
+    mainClass = 'com.portfolio.notificationservice.NotificationServiceApplication'
+}

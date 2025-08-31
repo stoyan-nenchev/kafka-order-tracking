@@ -1,1 +1,8 @@
-rootProject.name = 'order-tracking-system'
+rootProject.name = 'kafka-order-tracking'
+
+include 'shared-models'
+include 'order-service'
+include 'inventory-service'
+include 'shipping-service'
+include 'notification-service'
+include 'analytics-service'

@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Services (one per microservice)
+  postgres-order:
+    image: postgres:16-alpine
+    container_name: postgres-order-db
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+      - ./postgres/init-order-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-network
+
+  postgres-inventory:
+    image: postgres:16-alpine
+    container_name: postgres-inventory-db
+    environment:
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: inventoryuser
+      POSTGRES_PASSWORD: inventorypass123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_inventory_data:/var/lib/postgresql/data
+      - ./postgres/init-inventory-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-network
+
+  postgres-shipping:
+    image: postgres:16-alpine
+    container_name: postgres-shipping-db
+    environment:
+      POSTGRES_DB: shippingdb
+      POSTGRES_USER: shippinguser
+      POSTGRES_PASSWORD: shippingpass123
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_shipping_data:/var/lib/postgresql/data
+      - ./postgres/init-shipping-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-network
+
+  postgres-notification:
+    image: postgres:16-alpine
+    container_name: postgres-notification-db
+    environment:
+      POSTGRES_DB: notificationdb
+      POSTGRES_USER: notificationuser
+      POSTGRES_PASSWORD: notificationpass123
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_notification_data:/var/lib/postgresql/data
+      - ./postgres/init-notification-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-network
+
+  postgres-analytics:
+    image: postgres:16-alpine
+    container_name: postgres-analytics-db
+    environment:
+      POSTGRES_DB: analyticsdb
+      POSTGRES_USER: analyticsuser
+      POSTGRES_PASSWORD: analyticspass123
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_analytics_data:/var/lib/postgresql/data
+      - ./postgres/init-analytics-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kafka-network
+
+  # Kafka Infrastructure (KRaft mode - no Zookeeper needed)
+  kafka-controller:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-controller
+    container_name: kafka-controller
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-controller:29092,CONTROLLER://kafka-controller:29093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-controller:29092'
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller:29093,2@kafka-broker1:29093,3@kafka-broker2:29093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    ports:
+      - "9092:29092"
+    volumes:
+      - kafka_controller_data:/tmp/kraft-combined-logs
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:29092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kafka-broker1:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-broker1
+    container_name: kafka-broker1
+    depends_on:
+      - kafka-controller
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-broker1:29092,CONTROLLER://kafka-broker1:29093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker1:29092'
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller:29093,2@kafka-broker1:29093,3@kafka-broker2:29093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    ports:
+      - "9093:29092"
+    volumes:
+      - kafka_broker1_data:/tmp/kraft-combined-logs
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:29092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kafka-broker2:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka-broker2
+    container_name: kafka-broker2
+    depends_on:
+      - kafka-controller
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka-broker2:29092,CONTROLLER://kafka-broker2:29093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-broker2:29092'
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka-controller:29093,2@kafka-broker1:29093,3@kafka-broker2:29093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    ports:
+      - "9094:29092"
+    volumes:
+      - kafka_broker2_data:/tmp/kraft-combined-logs
+    networks:
+      - kafka-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:29092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kafka UI for monitoring
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka-controller
+      - kafka-broker1
+      - kafka-broker2
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kafka-order-tracking
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-controller:29092,kafka-broker1:29092,kafka-broker2:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: ""
+      DYNAMIC_CONFIG_ENABLED: true
+    networks:
+      - kafka-network
+
+  # Topic initialization service
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-init
+    depends_on:
+      kafka-controller:
+        condition: service_healthy
+      kafka-broker1:
+        condition: service_healthy  
+      kafka-broker2:
+        condition: service_healthy
+    networks:
+      - kafka-network
+    entrypoint: [ '/bin/bash', '-c' ]
+    command: |
+      "
+      echo 'Waiting for Kafka to be ready...'
+      sleep 30
+      
+      echo 'Creating Kafka topics...'
+      kafka-topics --create --topic orders.events --bootstrap-server kafka-controller:29092 --replication-factor 3 --partitions 3
+      kafka-topics --create --topic inventory.events --bootstrap-server kafka-controller:29092 --replication-factor 3 --partitions 3
+      kafka-topics --create --topic shipping.events --bootstrap-server kafka-controller:29092 --replication-factor 3 --partitions 3
+      kafka-topics --create --topic notification.events --bootstrap-server kafka-controller:29092 --replication-factor 3 --partitions 3
+      
+      echo 'Kafka topics created successfully:'
+      kafka-topics --list --bootstrap-server kafka-controller:29092
+      
+      echo 'Kafka setup completed!'
+      "
+
+volumes:
+  postgres_order_data:
+  postgres_inventory_data:
+  postgres_shipping_data:
+  postgres_notification_data:
+  postgres_analytics_data:
+  kafka_controller_data:
+  kafka_broker1_data:
+  kafka_broker2_data:
+
+networks:
+  kafka-network:
+    driver: bridge

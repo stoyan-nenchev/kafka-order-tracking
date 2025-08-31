@@ -1,0 +1,7 @@
+bootJar {
+    archiveFileName = 'analytics-service.jar'
+}
+
+springBoot {
+    mainClass = 'com.portfolio.analyticsservice.AnalyticsServiceApplication'
+}

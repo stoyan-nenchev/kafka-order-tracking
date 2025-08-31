@@ -1,0 +1,7 @@
+bootJar {
+    archiveFileName = 'inventory-service.jar'
+}
+
+springBoot {
+    mainClass = 'com.portfolio.inventoryservice.InventoryServiceApplication'
+}

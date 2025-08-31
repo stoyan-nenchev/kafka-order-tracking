@@ -1,0 +1,7 @@
+bootJar {
+    archiveFileName = 'order-service.jar'
+}
+
+springBoot {
+    mainClass = 'com.portfolio.orderservice.OrderServiceApplication'
+}

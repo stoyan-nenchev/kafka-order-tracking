@@ -1,0 +1,7 @@
+bootJar {
+    archiveFileName = 'shipping-service.jar'
+}
+
+springBoot {
+    mainClass = 'com.portfolio.shippingservice.ShippingServiceApplication'
+}

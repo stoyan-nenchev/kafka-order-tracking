@@ -1,33 +1,61 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.5'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '3.5.5' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
-group = 'com.kafka'
+group = 'com.portfolio'
 version = '0.0.1-SNAPSHOT'
-description = 'Project to showcase Kafka in Spring Boot.'
+description = 'Kafka Order Tracking System - Event-Driven Microservices Architecture'
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
-repositories {
-	mavenCentral()
+subprojects {
+    apply plugin: 'java'
+    
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+    
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }
 
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.kafka:spring-kafka'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+configure(subprojects.findAll {it.name != 'shared-models'}) {
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    
+    dependencies {
+        implementation project(':shared-models')
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.kafka:spring-kafka'
+        implementation 'org.postgresql:postgresql'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.kafka:spring-kafka-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks.register('buildAll') {
+    dependsOn subprojects.build
+}
+
+tasks.register('cleanAll') {
+    dependsOn subprojects.clean
+}
+
+wrapper {
+    gradleVersion = '8.11.1'
 }

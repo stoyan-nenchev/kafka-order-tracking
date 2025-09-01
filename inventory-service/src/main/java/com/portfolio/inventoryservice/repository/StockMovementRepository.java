@@ -11,9 +11,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
+public interface StockMovementRepository extends JpaRepository<StockMovement, UUID> {
     
     Page<StockMovement> findByProductIdOrderByCreatedAtDesc(String productId, Pageable pageable);
     

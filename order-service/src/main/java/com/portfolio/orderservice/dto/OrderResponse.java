@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderResponse {
     
-    private Long id;
+    private UUID id;
     private String correlationId;
     private CustomerInfo customerInfo;
     private List<OrderItem> orderItems;

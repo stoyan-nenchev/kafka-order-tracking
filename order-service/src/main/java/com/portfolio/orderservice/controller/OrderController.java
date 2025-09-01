@@ -55,7 +55,7 @@ public class OrderController {
     }
     
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponse> getOrder(@PathVariable Long orderId) {
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable UUID orderId) {
         log.debug("Retrieving order with ID: {}", orderId);
         
         OrderResponse response = orderService.getOrder(orderId);
@@ -90,7 +90,7 @@ public class OrderController {
     
     @PutMapping("/{orderId}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
-            @PathVariable Long orderId,
+            @PathVariable UUID orderId,
             @Valid @RequestBody UpdateOrderStatusRequest request) {
         
         log.info("Updating status for order {} to: {}", orderId, request.getStatus());

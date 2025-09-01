@@ -31,7 +31,7 @@ import java.util.UUID;
 public abstract class BaseEvent {
     private String eventId;
     private String correlationId;
-    private Long orderId;
+    private UUID orderId;
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;

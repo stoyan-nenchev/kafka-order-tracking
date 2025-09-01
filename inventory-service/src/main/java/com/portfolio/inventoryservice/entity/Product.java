@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "products", schema = "inventory_service")
@@ -21,8 +22,8 @@ import java.time.LocalDateTime;
 public class Product {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
     
     @Column(name = "product_id", nullable = false, unique = true)
     private String productId;
@@ -36,7 +37,6 @@ public class Product {
     @Column(name = "reserved_quantity", nullable = false)
     private Integer reservedQuantity;
     
-    // This will be computed by PostgreSQL as a generated column
     @Column(name = "available_quantity", insertable = false, updatable = false)
     private Integer availableQuantity;
     

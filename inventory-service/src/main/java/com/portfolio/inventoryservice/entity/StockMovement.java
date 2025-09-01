@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "stock_movements", schema = "inventory_service")
@@ -20,8 +21,8 @@ import java.time.LocalDateTime;
 public class StockMovement {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
     
     @Column(name = "product_id", nullable = false)
     private String productId;
@@ -34,7 +35,7 @@ public class StockMovement {
     private Integer quantity;
     
     @Column(name = "reference_id")
-    private String referenceId; // Order ID, correlation ID, etc.
+    private String referenceId;
     
     @Column(name = "notes")
     private String notes;

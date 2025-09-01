@@ -1,5 +1,7 @@
 package com.portfolio.orderservice.exception;
 
+import java.util.UUID;
+
 public class OrderNotFoundException extends RuntimeException {
     
     public OrderNotFoundException(String message) {
@@ -10,7 +12,7 @@ public class OrderNotFoundException extends RuntimeException {
         super(message, cause);
     }
     
-    public static OrderNotFoundException byId(Long orderId) {
+    public static OrderNotFoundException byId(UUID orderId) {
         return new OrderNotFoundException("Order not found with ID: " + orderId);
     }
     

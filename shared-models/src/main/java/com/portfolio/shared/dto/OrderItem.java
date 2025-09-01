@@ -4,9 +4,17 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItem {
     @NotBlank(message = "Product ID is required")
     private String productId;
@@ -26,77 +34,11 @@ public class OrderItem {
     private String category;
     private String sku;
     
-    public OrderItem() {}
-    
     public OrderItem(String productId, String productName, Integer quantity, BigDecimal unitPrice) {
         this.productId = productId;
         this.productName = productName;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-    }
-    
-    public OrderItem(String productId, String productName, Integer quantity, BigDecimal unitPrice,
-                    String description, String category, String sku) {
-        this(productId, productName, quantity, unitPrice);
-        this.description = description;
-        this.category = category;
-        this.sku = sku;
-    }
-    
-    public String getProductId() {
-        return productId;
-    }
-    
-    public void setProductId(String productId) {
-        this.productId = productId;
-    }
-    
-    public String getProductName() {
-        return productName;
-    }
-    
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-    
-    public Integer getQuantity() {
-        return quantity;
-    }
-    
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-    
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-    
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public String getCategory() {
-        return category;
-    }
-    
-    public void setCategory(String category) {
-        this.category = category;
-    }
-    
-    public String getSku() {
-        return sku;
-    }
-    
-    public void setSku(String sku) {
-        this.sku = sku;
     }
     
     public BigDecimal getTotalPrice() {

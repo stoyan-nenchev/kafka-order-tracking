@@ -36,11 +36,9 @@ public class InventoryService {
         log.info("Processing order created event for correlation ID: {}", event.getCorrelationId());
         
         try {
-            // Check stock availability for all items
             List<OrderItem> orderItems = event.getOrderItems();
             List<String> unavailableProducts = new ArrayList<>();
             
-            // First, check if all products exist and have sufficient stock
             for (OrderItem item : orderItems) {
                 Product product = productRepository.findByProductId(item.getProductId())
                         .orElse(null);
@@ -57,19 +55,15 @@ public class InventoryService {
             }
             
             if (!unavailableProducts.isEmpty()) {
-                // Reject the order
                 rejectOrder(event, "Insufficient stock for products: " + String.join(", ", unavailableProducts));
                 return;
             }
             
-            // If all products are available, reserve stock
             for (OrderItem item : orderItems) {
                 Product product = productRepository.findByProductIdWithLock(item.getProductId())
                         .orElseThrow(() -> ProductNotFoundException.byProductId(item.getProductId()));
                 
-                // Double-check availability (race condition protection)
                 if (!product.canReserve(item.getQuantity())) {
-                    // Release any already reserved stock and reject the order
                     releaseReservedStock(event.getCorrelationId());
                     int available = product.getStockQuantity() - product.getReservedQuantity();
                     rejectOrder(event, "Insufficient stock for product " + item.getProductId() + 
@@ -77,11 +71,9 @@ public class InventoryService {
                     return;
                 }
                 
-                // Reserve the stock
                 product.reserveStock(item.getQuantity());
                 productRepository.save(product);
                 
-                // Record stock movement
                 StockMovement movement = StockMovement.builder()
                         .productId(item.getProductId())
                         .movementType(StockMovementType.RESERVED)
@@ -95,7 +87,6 @@ public class InventoryService {
                         item.getQuantity(), item.getProductId(), event.getCorrelationId());
             }
             
-            // Confirm the order
             confirmOrder(event);
             
         } catch (Exception e) {
@@ -151,7 +142,6 @@ public class InventoryService {
                     product.releaseReservation(movement.getQuantity());
                     productRepository.save(product);
                     
-                    // Record the release movement
                     StockMovement releaseMovement = StockMovement.builder()
                             .productId(movement.getProductId())
                             .movementType(StockMovementType.RELEASED)
@@ -182,7 +172,6 @@ public class InventoryService {
                     product.confirmReservation(movement.getQuantity());
                     productRepository.save(product);
                     
-                    // Record the confirmation movement
                     StockMovement confirmMovement = StockMovement.builder()
                             .productId(movement.getProductId())
                             .movementType(StockMovementType.CONFIRMED)

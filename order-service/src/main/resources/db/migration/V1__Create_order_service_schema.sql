@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS order_service;
 
 -- Create orders table
 CREATE TABLE order_service.orders (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     correlation_id VARCHAR(255) NOT NULL UNIQUE,
     customer_info JSONB NOT NULL,
     order_items JSONB NOT NULL,
@@ -15,7 +15,6 @@ CREATE TABLE order_service.orders (
     version BIGINT DEFAULT 0
 );
 
--- Create indexes for performance
 CREATE INDEX idx_orders_correlation_id ON order_service.orders(correlation_id);
 CREATE INDEX idx_orders_customer_id ON order_service.orders USING GIN ((customer_info->>'customerId'));
 CREATE INDEX idx_orders_status ON order_service.orders(status);

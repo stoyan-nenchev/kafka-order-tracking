@@ -33,15 +33,12 @@ public class OrderService {
     public OrderResponse createOrder(CreateOrderRequest request, String correlationId) {
         log.debug("Creating order with correlation ID: {}", correlationId);
         
-        // Generate correlation ID if not provided
         if (correlationId == null || correlationId.trim().isEmpty()) {
             correlationId = UUID.randomUUID().toString();
         }
         
-        // Validate business rules
         validateOrderRequest(request);
         
-        // Create order entity
         Order order = Order.builder()
                 .correlationId(correlationId)
                 .customerInfo(request.getCustomerInfo())
@@ -51,11 +48,9 @@ public class OrderService {
                 .notes(request.getNotes())
                 .build();
         
-        // Save to database
         order = orderRepository.save(order);
         log.info("Order created successfully with ID: {} and correlation ID: {}", order.getId(), correlationId);
         
-        // Publish event
         OrderCreatedEvent event = OrderCreatedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .correlationId(correlationId)
@@ -73,7 +68,7 @@ public class OrderService {
     }
     
     @Transactional(readOnly = true)
-    public OrderResponse getOrder(Long orderId) {
+    public OrderResponse getOrder(UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> OrderNotFoundException.byId(orderId));
         return OrderResponse.from(order);
@@ -92,7 +87,7 @@ public class OrderService {
                 .map(OrderResponse::from);
     }
     
-    public OrderResponse updateOrderStatus(Long orderId, UpdateOrderStatusRequest request) {
+    public OrderResponse updateOrderStatus(UUID orderId, UpdateOrderStatusRequest request) {
         log.debug("Updating order {} status to: {}", orderId, request.getStatus());
         
         Order order = orderRepository.findById(orderId)
@@ -105,7 +100,6 @@ public class OrderService {
             throw new InvalidOrderStatusException("Invalid order status: " + request.getStatus());
         }
         
-        // Validate status transition
         validateStatusTransition(order.getStatus(), newStatus);
         
         order.setStatus(newStatus);
@@ -121,7 +115,6 @@ public class OrderService {
     }
     
     private void validateOrderRequest(CreateOrderRequest request) {
-        // Validate total amount matches order items
         BigDecimal calculatedTotal = request.getOrderItems().stream()
                 .map(item -> item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -130,7 +123,6 @@ public class OrderService {
             throw new IllegalArgumentException("Total amount does not match sum of order items");
         }
         
-        // Validate all items have positive quantities and prices
         request.getOrderItems().forEach(item -> {
             if (item.getQuantity() <= 0) {
                 throw new IllegalArgumentException("Order item quantity must be positive");
@@ -142,7 +134,6 @@ public class OrderService {
     }
     
     private void validateStatusTransition(OrderStatus currentStatus, OrderStatus newStatus) {
-        // Define allowed transitions
         switch (currentStatus) {
             case CREATED:
                 if (newStatus != OrderStatus.CONFIRMED && newStatus != OrderStatus.REJECTED && 

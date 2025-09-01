@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS inventory_service;
 
 -- Create products table
 CREATE TABLE inventory_service.products (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id VARCHAR(255) NOT NULL UNIQUE,
     product_name VARCHAR(255) NOT NULL,
     stock_quantity INTEGER NOT NULL DEFAULT 0,
@@ -18,7 +18,7 @@ CREATE TABLE inventory_service.products (
 
 -- Create stock movements audit table
 CREATE TABLE inventory_service.stock_movements (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id VARCHAR(255) NOT NULL,
     movement_type VARCHAR(50) NOT NULL,
     quantity INTEGER NOT NULL,
@@ -27,7 +27,6 @@ CREATE TABLE inventory_service.stock_movements (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create indexes for performance
 CREATE INDEX idx_products_product_id ON inventory_service.products(product_id);
 CREATE INDEX idx_products_available_quantity ON inventory_service.products(available_quantity);
 CREATE INDEX idx_products_reorder_level ON inventory_service.products(reorder_level) WHERE available_quantity <= reorder_level;

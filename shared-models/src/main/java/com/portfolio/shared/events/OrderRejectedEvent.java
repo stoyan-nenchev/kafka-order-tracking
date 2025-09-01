@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class OrderRejectedEvent extends BaseEvent {
     private String reason;
+    private String customerEmail;
     
     @Override
     public String getEventType() {

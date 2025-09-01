@@ -18,6 +18,7 @@ public class OrderDeliveredEvent extends BaseEvent {
     private String trackingNumber;
     private String deliveredTo;
     private String signedBy;
+    private java.time.LocalDate actualDeliveryDate;
     
     @Override
     public String getEventType() {

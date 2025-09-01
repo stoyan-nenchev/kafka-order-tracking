@@ -1,27 +1,21 @@
 package com.portfolio.shared.events;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class OrderRejectedEvent extends BaseEvent {
     private String reason;
-    
-    public OrderRejectedEvent() {
-        super();
-    }
-    
-    public OrderRejectedEvent(Long orderId, String correlationId, String reason) {
-        super(orderId, correlationId);
-        this.reason = reason;
-    }
     
     @Override
     public String getEventType() {
         return "ORDER_REJECTED";
-    }
-    
-    public String getReason() {
-        return reason;
-    }
-    
-    public void setReason(String reason) {
-        this.reason = reason;
     }
 }

@@ -3,6 +3,10 @@ package com.portfolio.shared.events;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +24,10 @@ import java.util.UUID;
     @JsonSubTypes.Type(value = OrderInTransitEvent.class, name = "ORDER_IN_TRANSIT"),
     @JsonSubTypes.Type(value = OrderDeliveredEvent.class, name = "ORDER_DELIVERED")
 })
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class BaseEvent {
     private String eventId;
     private String correlationId;
@@ -27,49 +35,6 @@ public abstract class BaseEvent {
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
-    
-    protected BaseEvent() {
-        this.eventId = UUID.randomUUID().toString();
-        this.timestamp = LocalDateTime.now();
-    }
-    
-    protected BaseEvent(Long orderId, String correlationId) {
-        this();
-        this.orderId = orderId;
-        this.correlationId = correlationId;
-    }
-    
-    public String getEventId() {
-        return eventId;
-    }
-    
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-    
-    public String getCorrelationId() {
-        return correlationId;
-    }
-    
-    public void setCorrelationId(String correlationId) {
-        this.correlationId = correlationId;
-    }
-    
-    public Long getOrderId() {
-        return orderId;
-    }
-    
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-    
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-    
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
     
     public abstract String getEventType();
 }

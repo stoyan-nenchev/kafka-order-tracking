@@ -1,0 +1,69 @@
+groups:
+  - name: microservices
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "{{ $labels.job }} service has been down for more than 30 seconds"
+
+      - alert: HighResponseTime
+        expr: http_server_requests_seconds{quantile="0.95"} > 0.5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time for {{ $labels.job }}"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate for {{ $labels.job }}"
+          description: "Error rate is {{ $value }} errors per second for {{ $labels.job }}"
+
+      - alert: DatabaseConnectionIssues
+        expr: hikaricp_connections_active / hikaricp_connections_max > 0.8
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $labels.job }} is using {{ $value }}% of database connections"
+
+  - name: kafka
+    rules:
+      - alert: KafkaConsumerLag
+        expr: kafka_consumer_lag_max > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High consumer lag in Kafka"
+          description: "Consumer lag is {{ $value }} messages for {{ $labels.topic }}"
+
+  - name: system
+    rules:
+      - alert: HighCPUUsage
+        expr: system_cpu_usage > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: jvm_memory_used_bytes / jvm_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High JVM memory usage"
+          description: "JVM memory usage is {{ $value }}% for {{ $labels.job }}"

@@ -64,6 +64,14 @@ configure(subprojects.findAll {it.name != 'shared-models'}) {
         implementation 'org.postgresql:postgresql'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        
+        // Resilience4j for circuit breakers and resilience patterns
+        implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
+        implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
+        implementation 'io.github.resilience4j:resilience4j-retry:2.1.0'
+        implementation 'io.github.resilience4j:resilience4j-timelimiter:2.1.0'
+        implementation 'io.github.resilience4j:resilience4j-micrometer:2.1.0'
         
         // Lombok
         compileOnly 'org.projectlombok:lombok'
